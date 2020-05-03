@@ -17,6 +17,23 @@ class App {
   }
 
   /**
+   * Define o carregamento durante a requisição
+   */
+  setLoading(loading = true) {
+    // se estiver carregando
+    if (loading === true) {
+      let loadingElement = document.createElement('span'); // criar um elemento span
+      loadingElement.appendChild(document.createTextNode('Carregando')); // atribuir o texto carregando
+      loadingElement.setAttribute('id', 'loading'); // definir um id
+
+      this.formElement.appendChild(loadingElement); // agregando o elemento no formulário
+      return;
+    }
+
+    document.getElementById('loading').remove(); // se não estiver carregando, apagar elemento
+  }
+
+  /**
    * Adiciona repositórios
    */
   async addRepository(event) {
@@ -28,23 +45,31 @@ class App {
       return; // interrompe a execucao da função
     }
 
-    const response = await api.get(`/repos/${repositoryInput}`); // fazendo a requisicao a api
-    const {
-      name,
-      description,
-      html_url,
-      owner: { avatar_url },
-    } = response.data; // desestruturando a responsta
+    this.setLoading();
 
-    this.repositories.push({
-      name,
-      description,
-      avatar_url,
-      html_url,
-    }); // adicionando à lista com objeto desestruturado
+    try {
+      const response = await api.get(`/repos/${repositoryInput}`); // fazendo a requisicao a api
+      const {
+        name,
+        description,
+        html_url,
+        owner: { avatar_url },
+      } = response.data; // desestruturando a responsta
 
-    this.inputElement.value = '';
-    this.render();
+      this.repositories.push({
+        name,
+        description,
+        avatar_url,
+        html_url,
+      }); // adicionando à lista com objeto desestruturado
+
+      this.inputElement.value = '';
+      this.render();
+    } catch (error) {
+      alert('O repositório não existe.');
+    }
+
+    this.setLoading(false);
   }
 
   render() {
